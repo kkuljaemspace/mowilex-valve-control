@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+
+{% block title %}
+Menu
+{% endblock title %}
+
+
+{% block content %}
+
+<div class="row gy-6 gy-md-0 justify-content-center">
+    <!-- User Sidebar -->
+    <div class="col-12 order-1 order-md-0">
+        <!-- User Card -->
+        <div class="card mb-6">
+            <div class="card-body pt-5 mt-5">
+                <form method="POST">
+                {% csrf_token %}
+                <div class="col-12 mb-5 text-center">
+                    <h4>SCAN PO</h4>
+                </div>
+                <div class="col-12 mt-5 mb-5">
+                    <input type="text" class="form-control w-100 h-100 mb-5 text-center" style="width:100%; height:30px; font-size:25px"
+                           placeholder="Scan" name="scan_value" autofocus="autofocus">
+                </div>
+                    {% if error %}
+                <div class="col-12 mt-5">
+                        <p>{{ error }}</p>
+                </div>
+                    {% endif %}
+                <div class="col-12 mt-5">
+                    <button type="submit" class="btn btn-success w-100 h-100 mt-5 mb-5"><p
+                            class="h4 text-white mt-3"><i class="ri-send-plane-line h4 text-white"></i>&nbsp;SUBMIT</p>
+                    </button>
+                </div>
+                </form>
+            </div>
+        </div>
+        <!-- /User Card -->
+    </div>
+    <!--/ User Sidebar -->
+</div>
+<!-- Modal -->
+{% endblock %}

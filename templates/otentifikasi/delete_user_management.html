@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+Delete User: {{ user.username }}
+{% endblock title %}
+
+
+{% block content %}
+<div class="row gy-6 gy-md-0 justify-content-center">
+        <!-- User Sidebar -->
+        <div class="col-6 order-1 order-md-0">
+            <!-- User Card -->
+            <div class="card mb-6">
+                <div class="card-header bg-primary text-white">
+                    Delete User: {{ user.username }}
+                </div>
+                <div class="card-body pt-5">
+  <p>Are you sure you want to delete "{{ user.username }}"?</p>
+  <form method="POST">
+    {% csrf_token %}
+    <div class="row">
+      <div class="col-6">
+    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete: {{ user.username }} ?')">Confirm Delete</button>
+        </div>
+      <div class="col-6 text-end">
+    <a href="javascript:void(0);" class="btn btn-secondary" onclick="window.close();">Cancel</a>
+    </div>
+    </div>
+  </form>
+{% endblock %}
+                </div>
+            </div>
+        </div>
+</div>

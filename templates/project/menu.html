@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+
+{% block title %}
+Menu
+{% endblock title %}
+
+
+{% block content %}
+
+<div class="row gy-6 gy-md-0 justify-content-center">
+    <!-- User Sidebar -->
+    <div class="col-12 order-1 order-md-0">
+        <!-- User Card -->
+        <div class="card mb-6">
+            <div class="card-body pt-5">
+                <div class="col-12 mb-2">
+                    <a href="{% url 'scan' %}" class="btn btn-info w-100 h-100"><p class="h4 text-white mt-3"><i class="ri-qr-scan-line h4 text-white"></i>&nbsp;SCAN</p></a>
+                </div>
+                <div class="col-12 mb-2">
+                    <a href="{% url 'inquiry' %}" class="btn btn-success w-100 h-100"><p class="h4 text-white mt-3"><i class="ri-clipboard-line h4 text-white"></i>&nbsp;INQUIRY</p></a>
+                </div>
+                <div class="col-12 mb-2">
+                    <a href="{% url 'logout' %}" class="btn btn-secondary w-100 h-100"><p class="h4 text-white mt-3"><i class="ri-logout-box-r-line h4 text-white"></i>&nbsp;LOGOFF</p></a>
+                </div>
+            </div>
+        </div>
+        <!-- /User Card -->
+    </div>
+    <!--/ User Sidebar -->
+</div>
+<!-- Modal -->
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+
+{% block title %}
+Add User Management
+{% endblock title %}
+
+
+{% block content %}
+    <div class="row gy-6 gy-md-0 justify-content-center">
+        <!-- User Sidebar -->
+        <div class="col-6 order-1 order-md-0">
+            <!-- User Card -->
+            <div class="card mb-6">
+                <div class="card-header bg-primary text-white">
+                    Add User
+                </div>
+                <div class="card-body pt-5">
+    <form class="row g-5 mt-4" method="POST" action="" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row">
+            <!-- Render First Name -->
+            <div class="col-6">
+                <label for="{{ adduserform.first_name.id_for_label }}">{{ adduserform.first_name.label }}</label>
+                {{ adduserform.first_name }}
+            </div>
+            <!-- Render Last Name -->
+            <div class="col-6">
+                <label for="{{ adduserform.last_name.id_for_label }}">{{ adduserform.last_name.label }}</label>
+                {{ adduserform.last_name }}
+            </div>
+        </div>
+
+        <div class="row mt-2">
+            <!-- Render Email -->
+            <div class="col-6">
+                <label for="{{ adduserform.email.id_for_label }}">{{ adduserform.email.label }}</label>
+                {{ adduserform.email }}
+            </div>
+            <!-- Render Photo -->
+            <div class="col-6">
+                <label for="{{ adduserform.photo.id_for_label }}">{{ adduserform.photo.label }}</label>
+                {{ adduserform.photo }}
+            </div>
+        </div>
+
+        <div class="row mt-2">
+            <!-- Render Groups -->
+            <div class="col-6">
+                <label for="{{ adduserform.groups.id_for_label }}">{{ adduserform.groups.label }}</label>
+                {{ adduserform.groups }}
+            </div>
+            <!-- Render Username -->
+            <div class="col-6">
+                <label for="{{ adduserform.username.id_for_label }}">{{ adduserform.username.label }}</label>
+                {{ adduserform.username }}
+            </div>
+        </div>
+
+        <div class="row mt-2">
+            <!-- Render Password1 -->
+            <div class="col-6">
+                <label for="{{ adduserform.password1.id_for_label }}">{{ adduserform.password1.label }}</label>
+                {{ adduserform.password1 }}
+            </div>
+            <!-- Render Password2 -->
+            <div class="col-6">
+                <label for="{{ adduserform.password2.id_for_label }}">{{ adduserform.password2.label }}</label>
+                {{ adduserform.password2 }}
+            </div>
+        </div>
+
+        <div class="col-12 text-center d-flex flex-wrap justify-content-center gap-4 row-gap-4">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </form>
+</div>
+
+            </div>
+            <!-- /User Card -->
+        </div>
+        <!--/ User Sidebar -->
+    </div>
+
+    <div class="row gy-6 gy-md-0 justify-content-center mt-4">
+        <div class="col-6 order-1 order-md-0">
+            <a href="/user-management" class="btn btn-primary">
+                        <i class="ri-arrow-left-line ri-22px"></i> User Management</a>
+        </div>
+    </div>
+    <!-- Modal -->
+{% endblock %}

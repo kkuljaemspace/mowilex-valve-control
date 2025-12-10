@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+
+
+{% block title %}
+Profile
+{% endblock title %}
+
+
+{% block content %}
+
+    <div class="row gy-6 gy-md-0 justify-content-center">
+        <!-- User Sidebar -->
+        <div class="col-xl-4 col-md-6 col-sm-12 order-1 order-md-0">
+            <!-- User Card -->
+            <div class="card mb-6">
+                <div class="card-body pt-12">
+                    <div class="user-avatar-section">
+                        <div class="d-flex align-items-center flex-column">
+                            <img
+                                    class="img-fluid rounded-3 mb-4"
+                                    {% if request.user.photo %}
+                                    src="{{ request.user.photo.url }}"
+                                    {% else %}
+                                    src="/static/assets/img/avatars/1.png"
+                                    {% endif %}
+                                    height="120"
+                                    width="120"
+                                    alt="User avatar"/>
+                            <div class="user-info text-center">
+                                <b>{{ request.user.first_name }} {{ request.user.last_name }}</b><br>
+                                <span class="badge bg-label-danger rounded-pill mt-1">{{ request.user.groups.all.last }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <h5 class="pb-4 border-bottom mb-4">Profile</h5>
+                    <div class="info-container">
+                        <ul class="list-unstyled mb-6">
+                            <li class="mb-2">
+                                <span class="fw-medium text-heading me-2">Username:</span>
+                                <span>{{ request.user.username }}</span>
+                            </li>
+                            <li class="mb-2">
+                                <span class="fw-medium text-heading me-2">Email:</span>
+                                <span>{{ request.user.email }}</span>
+                            </li>
+                            <li class="mb-2">
+                                <span class="fw-medium text-heading me-2">Status:</span>
+                                <span class="badge bg-label-success rounded-pill">{% if request.user.is_active == True %}Active{% else %}Non Active{% endif %}</span>
+                            </li>
+                            <li class="mb-2">
+                                <span class="fw-medium text-heading me-2">Role:</span>
+                                <span>{{ request.user.groups.all.last }}</span>
+                            </li>
+                        </ul>
+                        <div class="d-flex justify-content-center">
+                            <a
+                                    href="javascript:;"
+                                    class="btn btn-primary me-4"
+                                    data-bs-target="#editUser"
+                                    data-bs-toggle="modal"
+                            >Edit</a>
+                            <a
+                                    href="javascript:;"
+                                    class="btn btn-danger me-4"
+                                    data-bs-target="#ubahPassword"
+                                    data-bs-toggle="modal"
+                            >Ubah Password</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /User Card -->
+        </div>
+        <!--/ User Sidebar -->
+    </div>
+    <!-- Modal -->
+    <!-- Edit User Modal -->
+    <div class="modal fade" id="editUser" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-simple">
+            <div class="modal-content">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-body p-0">
+                    <div class="text-center mb-6">
+                        <h4 class="mb-2">Edit Information</h4>
+                        <p class="mb-6">Personalisasikan sesuai dengan informasi anda.</p>
+                    </div>
+                    <form class="row g-5" method="POST" action="/edit-profile" enctype="multipart/form-data">
+                        {% csrf_token %}
+                         <div class="col-12">
+                            <div class="form-floating form-floating-outline">
+                            <input type="text" class="form-control" value="{{ request.user.username }}" disabled>
+                            </div>
+                        </div>
+                         <div class="col-12 col-md-6">
+                            <div class="form-floating form-floating-outline">
+                            {{ form1.first_name }}
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="form-floating form-floating-outline">
+                            {{ form1.last_name }}
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="form-floating form-floating-outline">
+                            {{ form1.email }}
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="form-floating form-floating-outline">
+                            {{ form1.photo }}
+                            </div>
+                        </div>
+                        <div class="col-12 text-center d-flex flex-wrap justify-content-center gap-4 row-gap-4">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                            <button
+                                    type="reset"
+                                    class="btn btn-outline-secondary"
+                                    data-bs-dismiss="modal"
+                                    aria-label="Close">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--/ Edit User Modal -->
+    <!-- Edit User Modal -->
+    <div class="modal fade" id="ubahPassword" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-simple">
+            <div class="modal-content">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-body p-0">
+                    <div class="text-center mb-6">
+                        <h4 class="mb-2">Change Password</h4>
+                        <p class="mb-6">Ubah Password Anda Dengan Lebih Aman<br>Disarankan Menggunakan Alfabet, Angka dan Simbol Unik.</p>
+                    </div>
+                    <form class="row g-5" method="POST" action="/change-password">
+                        {% csrf_token %}
+                        <div class="col-12">
+                            <div class="form-floating form-floating-outline">
+                                <input
+                                        type="password"
+                                        name="old_password"
+                                        class="form-control"
+                                        placeholder="**********"/>
+                                <label>Password Saat Ini</label>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="form-floating form-floating-outline">
+                                <input
+                                        type="password"
+                                        name="new_password1"
+                                        class="form-control"
+                                        placeholder="Password Baru"/>
+                                <label>Password Baru</label>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="form-floating form-floating-outline">
+                                <input
+                                        type="password"
+                                        name="new_password2"
+                                        class="form-control"
+                                        placeholder="Masukan Password Baru Lagi"/>
+                                <label>Masukan Password Baru Lagi</label>
+                            </div>
+                        </div>
+                        <div class="col-12 text-center d-flex flex-wrap justify-content-center gap-4 row-gap-4">
+                            <button type="submit" class="btn btn-danger">Ubah Password</button>
+                            <button
+                                    type="reset"
+                                    class="btn btn-outline-secondary"
+                                    data-bs-dismiss="modal"
+                                    aria-label="Close">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--/ Edit User Modal -->
+{% endblock %}

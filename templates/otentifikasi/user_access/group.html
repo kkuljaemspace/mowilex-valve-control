@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Daftar Grup{% endblock %}
+{% block content %}
+    <div class="row gy-6 gy-md-0 justify-content-center">
+        <!-- User Sidebar -->
+        <div class="col-6 order-1 order-md-0">
+            <!-- User Card -->
+            <div class="card mb-6">
+                <div class="card-header bg-primary text-white">
+                    Daftar Grup
+                </div>
+                <div class="card-body pt-5">
+<a href="{% url 'add_group' %}" class="btn btn-primary mb-3">Tambah Grup</a>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nama Grup</th>
+            <th>Aksi</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for group in groups %}
+        <tr>
+            <td>{{ group.name }}</td>
+            <td>
+                <a href="{% url 'edit_group' group.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                <a href="{% url 'delete_group' group.pk %}" class="btn btn-sm btn-danger">Hapus</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="2">Tidak ada grup yang tersedia.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+                </div>
+                </div>
+                </div>
+                </div>
+
+{% endblock %}

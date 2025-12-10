@@ -1,0 +1,471 @@
+<!doctype html>
+
+<html
+        lang="en"
+        class="light-style layout-menu-fixed layout-compact"
+        dir="ltr"
+        data-theme="theme-default"
+        data-assets-path="/static/assets/"
+        data-template="horizontal-menu-template-no-customizer"
+        data-style="light">
+<head>
+    <meta charset="utf-8"/>
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"/>
+
+    <title>{% block title %}{% endblock title %} |
+            {% if app_identity %}
+            {{ app_identity.nickname }}
+            {% else %}
+            Python Applications
+            {% endif %}
+    </title>
+
+    <meta name="description" content=""/>
+
+    <!-- Favicon -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="icon" type="image/x-icon"
+
+            {% if app_identity %}
+            href="{{ app_identity.logo.url }}"
+            {% else %}
+            href="/static/assets/img/icons/brands/python.png"
+            {% endif %}/>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&ampdisplay=swap"
+            rel="stylesheet"/>
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="/static/assets/vendor/fonts/remixicon/remixicon.css"/>
+    <link rel="stylesheet" href="/static/assets/vendor/fonts/flag-icons.css"/>
+
+    <!-- Menu waves for no-customizer fix -->
+    <link rel="stylesheet" href="/static/assets/vendor/libs/node-waves/node-waves.css"/>
+
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="/static/assets/vendor/css/rtl/core.css"/>
+    <link rel="stylesheet" href="/static/assets/vendor/css/rtl/theme-default.css"/>
+    <link rel="stylesheet" href="/static/assets/css/demo.css"/>
+
+    <!-- Vendors CSS -->
+    <link rel="stylesheet" href="/static/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css"/>
+    <link rel="stylesheet" href="/static/assets/vendor/libs/typeahead-js/typeahead.css"/>
+    <link rel="stylesheet" href="/static/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css"/>
+    <link rel="stylesheet" href="/static/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css"/>
+    <link rel="stylesheet" href="/static/assets/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css"/>
+    <link rel="stylesheet" href="/static/assets/vendor/libs/datatables-checkboxes-jquery/datatables.checkboxes.css"/>
+    <link rel="stylesheet" href="/static/assets/vendor/libs/animate-css/animate.css"/>
+    <link rel="stylesheet" href="/static/assets/vendor/libs/datatables-checkboxes-jquery/datatables.checkboxes.css"/>
+    <link rel="stylesheet" href="/static/assets/vendor/libs/sweetalert2/sweetalert2.css"/>
+<!--    <link rel="stylesheet" href="/static/assets/vendor/libs/tagify/tagify.css"/>-->
+<!--    <link rel="stylesheet" href="/static/assets/vendor/libs/@form-validation/form-validation.css"/>-->
+
+    <!-- Page CSS -->
+
+    <link rel="stylesheet" href="/static/assets/vendor/css/pages/page-user-view.css"/>
+
+    <!-- Helpers -->
+    <script src="/static/assets/vendor/js/helpers.js"></script>
+    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
+    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
+    <script src="/static/assets/js/config.js"></script>
+
+    {% block  scriptheader %}
+    {% endblock scriptheader %}
+    <link rel="stylesheet" href="https://unpkg.com/@yaireo/tagify/dist/tagify.css">
+    <script src="https://unpkg.com/@yaireo/tagify"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <!-- Include django-select2 CSS and JS -->
+</head>
+
+<body>
+<!-- Layout wrapper -->
+<div class="layout-wrapper layout-navbar-full layout-horizontal layout-without-menu">
+    <div class="layout-container">
+        <!-- Navbar -->
+        <nav class="layout-navbar navbar navbar-expand-xl align-items-center bg-navbar-theme" id="layout-navbar">
+            <div class="container-xxl">
+                <div class="navbar-brand app-brand demo d-none d-xl-flex py-0 me-6">
+                    <a href="/" class="app-brand-link gap-2">
+                <span class="app-brand-logo demo">
+                  <span style="color: var(--bs-primary)">
+                        <img
+
+            {% if app_identity %}
+            src="{{ app_identity.logo.url }}"
+            {% else %}
+            src="/static/assets/img/icons/brands/python.png"
+            {% endif %}
+                                style="width: 40px;">
+                  </span>
+                </span>
+                        <span class="app-brand-text demo menu-text fw-semibold">
+                            {% if app_identity %}
+            {{ app_identity.nickname }}
+            {% else %}
+            Python Applications
+            {% endif %}
+                        </span>
+                    </a>
+
+                    <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-xl-none">
+                        <i class="ri-close-fill align-middle"></i>
+                    </a>
+                </div>
+
+                <div class="layout-menu-toggle navbar-nav align-items-xl-center me-4 me-xl-0 d-xl-none">
+                    <a class="nav-item nav-link px-0 me-xl-6" href="javascript:void(0)">
+                        <i class="ri-menu-fill ri-22px"></i>
+                    </a>
+                </div>
+
+                <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+                    <ul class="navbar-nav flex-row align-items-center ms-auto">
+                        <!-- Date and Time -->
+                        <li class="nav-item me-3">
+                            <div class="d-flex flex-column align-items-end">
+                                <span id="current-date" class="text-muted small"></span>
+                                <span id="current-time" class="fw-medium"></span>
+                            </div>
+                        </li>
+                        <!-- User -->
+                        <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                            <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);"
+                               data-bs-toggle="dropdown">
+                                <div class="avatar avatar-online">
+                                    <img
+                                            {% if request.user.photo %}
+                                            src="{{ request.user.photo.url }}"
+                                            {% else %}
+                                            src="/static/assets/img/avatars/1.png"
+                                            {% endif %}
+                                            alt
+                                            class="rounded-circle"/>
+                                </div>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a class="dropdown-item" href="pages-account-settings-account.html">
+                                        <div class="d-flex">
+                                            <div class="flex-shrink-0 me-2">
+                                                <div class="avatar avatar-online">
+                                                    <img
+                                                            {% if request.user.photo %}
+                                                            src="{{ request.user.photo.url }}"
+                                                            {% else %}
+                                                            src="/static/assets/img/avatars/1.png"
+                                                            {% endif %}
+                                                            alt
+                                                            class="rounded-circle"/>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <span class="fw-medium d-block small">{{ request.user.first_name }} {{ request.user.last_name }}</span>
+                                                <small class="text-muted">{{ request.user.groups.all.last }}</small>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <div class="dropdown-divider"></div>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/">
+                                        <i class="ri-user-3-line ri-22px me-3"></i><span
+                                            class="align-middle">Profile</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <div class="d-grid px-4 pt-2 pb-1">
+                                        <a class="btn btn-sm btn-danger d-flex" href="/logout"
+                                           target="_blank">
+                                            <small class="align-middle">Logout</small>
+                                            <i class="ri-logout-box-r-line ms-2 ri-16px"></i>
+                                        </a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                        <!--/ User -->
+                    </ul>
+                </div>
+
+            </div>
+        </nav>
+        <!-- / Navbar -->
+        <!-- Layout container -->
+        <div class="layout-page">
+            <!-- Content wrapper -->
+            <div class="content-wrapper">
+                <!-- Menu -->
+                <aside id="layout-menu" class="layout-menu-horizontal menu-horizontal menu bg-menu-theme flex-grow-0">
+                    <div class="container-xxl d-flex h-100">
+                        <ul class="menu-inner">
+                            <!-- Date Info -->
+                            <li class="menu-item mx-2">
+                                <div id="info">
+                                    <a class="menu-link">
+                                        <i class="menu-icon tf-icons ri-calendar-line"></i>
+                                        <div data-i18n="Tanggal" id="menu-date">Memuat...</div>
+                                    </a>
+                                </div>
+                            </li>
+                            <!-- Config -->
+                            {% if request.user.is_superuser %}
+                            <li class="menu-item mx-2">
+                                <a href="javascript:void(0)" class="menu-link menu-toggle">
+                                    <i class="menu-icon tf-icons ri-tools-fill"></i>
+                                    <div data-i18n="Config">Confighehe</div>
+                                </a>
+                                <ul class="menu-sub">
+                                    <li class="menu-item">
+                                        <a href="/" class="menu-link">
+                                            <i class="menu-icon tf-icons ri-user-3-line"></i>
+                                            <div data-i18n="Profile">Profile</div>
+                                        </a>
+                                    </li>
+                                    <li class="menu-item">
+                                        <a href="/app-identity" class="menu-link">
+                                            <i class="menu-icon tf-icons ri-id-card-line"></i>
+                                            <div data-i18n="App Identity">App Identity</div>
+                                        </a>
+                                    </li>
+                                    <li class="menu-item">
+                                        <a href="/user-management" class="menu-link">
+                                            <i class="menu-icon tf-icons ri-group-line"></i>
+                                            <div data-i18n="User Management">User Management</div>
+                                        </a>
+                                    </li>
+                                    <li class="menu-item">
+                                        <a href="/groups/" class="menu-link">
+                                            <i class="menu-icon tf-icons ri-group-fill"></i>
+                                            <div data-i18n="Groups">Groups</div>
+                                        </a>
+                                    </li>
+                                    <li class="menu-item">
+                                        <a href="/menus/" class="menu-link">
+                                            <i class="menu-icon tf-icons ri-folder-fill"></i>
+                                            <div data-i18n="Menu">Menu</div>
+                                        </a>
+                                    </li>
+                                    <li class="menu-item">
+                                        <a href="/submenus/" class="menu-link">
+                                            <i class="menu-icon tf-icons ri-file-fill"></i>
+                                            <div data-i18n="Submenu">Submenu</div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            {% endif %}
+                            {% for item in menu_list %}
+                            <li class="menu-item mx-2">
+                                <a href="javascript:void(0)" class="menu-link menu-toggle">
+                                    {% if item.menu.icon %}
+                                    <i class="menu-icon tf-icons {{ item.menu.icon }}"></i>
+                                    {% else %}
+                                    <i class="menu-icon tf-icons ri-folder-line"></i>
+                                    {% endif %}
+                                    <div data-i18n="{{ item.menu.name }}">{{ item.menu.name }}</div>
+                                </a>
+                                <ul class="menu-sub">
+                                    {% for submenu in item.submenus %}
+                                    <li class="menu-item">
+                                        <a href="{{ submenu.url }}" class="menu-link">
+                                            {% if submenu.icon %}
+                                            <i class="menu-icon tf-icons {{ submenu.icon }}"></i>
+                                            {% else %}
+                                            <i class="menu-icon tf-icons ri-file-line"></i>
+                                            {% endif %}
+                                            <div data-i18n="{{ submenu.name }}">{{ submenu.name }}</div>
+                                        </a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </aside>
+                <!-- / Menu -->
+                <div class="container-xxl flex-grow-1 container-p-y">
+                    {% for message in messages %}
+                    <div class="row">
+                        <div class="alert alert-solid-{{ message.tags }} d-flex align-items-center" role="alert">
+                        <span class="alert-icon rounded">
+                        {% if message.tags == 'success' %}
+                        <i class="ri-checkbox-circle-line ri-22px"></i>
+                        {% elif message.tags == 'warning' %}
+                        <i class="ri-close-circle-line ri-22px"></i>
+                        {% elif message.tags == 'info' %}
+                        <i class="ri-alert-line ri-22px"></i>
+                        {% endif %}
+                        </span>
+                        {{ message }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                <!-- Content -->
+                {% block content %}
+                {% endblock content %}
+                <!--/ Content -->
+                </div>
+
+                <!-- Footer -->
+                <footer class="content-footer footer bg-footer-theme">
+                    <div class="container-xxl">
+                        <div
+                                class="footer-container d-flex align-items-center justify-content-between py-4 flex-md-row flex-column">
+                            <div class="text-body mb-2 mb-md-0 small">
+                                ©
+                                <script>
+                                    document.write(new Date().getFullYear());
+                                </script>
+                                <a href="https://lerix.co.id" target="_blank" class="footer-link text-light">Lerix Engine Version 3.0</a>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+                <!-- / Footer -->
+
+                <div class="content-backdrop fade"></div>
+            </div>
+            <!--/ Content wrapper -->
+        </div>
+
+        <!--/ Layout container -->
+    </div>
+</div>
+
+<!-- Overlay -->
+<div class="layout-overlay layout-menu-toggle"></div>
+
+<!-- Drag Target Area To SlideIn Menu On Small Screens -->
+<div class="drag-target"></div>
+
+<!--/ Layout wrapper -->
+<script>
+    // Ambil semua elemen menu-item (termasuk sub-menu-nya)
+    const menuItems = document.querySelectorAll('.menu-item a');
+
+    // Dapatkan URL saat ini
+    const currentPath = window.location.pathname;
+
+    // Loop melalui menu-item dan tambahkan kelas 'active' jika link sesuai dengan URL saat ini
+    menuItems.forEach(item => {
+        if (item.getAttribute('href') === currentPath) {
+            // Tambahkan 'active' ke elemen li parent dan li utama jika ada
+            item.closest('.menu-item').classList.add('active');
+
+            // Jika item berada dalam submenu, juga tambahkan kelas 'active' pada menu induknya
+            const parentMenu = item.closest('.menu-sub');
+            if (parentMenu) {
+                parentMenu.closest('.menu-item').classList.add('active');
+            }
+        }
+    });
+</script>
+
+<!-- Core JS -->
+<!-- build:js assets/vendor/js/core.js -->
+<!-- JS Select2 -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script src="/static/assets/vendor/libs/jquery/jquery.js"></script>
+<script src="/static/assets/vendor/libs/popper/popper.js"></script>
+<script src="/static/assets/vendor/js/bootstrap.js"></script>
+<script src="/static/assets/vendor/libs/node-waves/node-waves.js"></script>
+<script src="/static/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+<script src="/static/assets/vendor/libs/hammer/hammer.js"></script>
+<script src="/static/assets/vendor/libs/i18n/i18n.js"></script>
+<script src="/static/assets/vendor/libs/typeahead-js/typeahead.js"></script>
+<script src="/static/assets/vendor/js/menu.js"></script>
+
+<!-- endbuild -->
+
+<!-- Vendors JS -->
+<script src="/static/assets/vendor/libs/moment/moment.js"></script>
+<script src="/static/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+<script src="/static/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+<script src="/static/assets/vendor/libs/cleavejs/cleave.js"></script>
+<script src="/static/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
+<script src="/static/assets/vendor/libs/tagify/tagify.js"></script>
+<!--<script src="/static/assets/vendor/libs/@form-validation/popular.js"></script>-->
+<!--<script src="/static/assets/vendor/libs/@form-validation/bootstrap5.js"></script>-->
+<!--<script src="/static/assets/vendor/libs/@form-validation/auto-focus.js"></script>-->
+
+<!-- Main JS -->
+<script src="/static/assets/js/main.js"></script>
+
+<!-- Page JS -->
+<!--<script src="/static/assets/js/modal-edit-user.js"></script>-->
+<script src="/static/assets/js/app-user-view.js"></script>
+<script src="/static/assets/js/app-user-view-account.js"></script>
+
+
+<!-- Include jQuery and jQuery UI at the end of body -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+
+<!-- Date and Time Script -->
+<script>
+    // Function to update date and time
+    function updateDateTime() {
+        const now = new Date();
+        
+        // Format tanggal untuk navbar (contoh: Selasa, 10 Desember 2025)
+        const optionsDate = { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        };
+        const dateString = now.toLocaleDateString('id-ID', optionsDate);
+        
+        // Format waktu (contoh: 14:30:45)
+        const optionsTime = { 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit',
+            hour12: false
+        };
+        const timeString = now.toLocaleTimeString('id-ID', optionsTime);
+        
+        // Format tanggal untuk menu (contoh: Sabtu, 1/3/2025)
+        const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const dayName = dayNames[now.getDay()];
+        const day = now.getDate();
+        const month = now.getMonth() + 1;
+        const year = now.getFullYear();
+        const menuDateString = `${dayName}, ${day}/${month}/${year}`;
+        
+        // Update elemen HTML
+        const dateElement = document.getElementById('current-date');
+        const timeElement = document.getElementById('current-time');
+        const menuDateElement = document.getElementById('menu-date');
+        
+        if (dateElement) dateElement.textContent = dateString;
+        if (timeElement) timeElement.textContent = timeString;
+        if (menuDateElement) menuDateElement.textContent = menuDateString;
+    }
+    
+    // Jalankan saat DOM siap
+    document.addEventListener('DOMContentLoaded', function() {
+        updateDateTime(); // Panggil pertama kali
+        setInterval(updateDateTime, 1000); // Update setiap 1 detik
+    });
+</script>
+
+{% block scriptbottom %}
+{% endblock scriptbottom %}
+
+</body>
+</html>

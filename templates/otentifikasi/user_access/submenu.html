@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Daftar Submenu{% endblock %}
+{% block content %}
+    <div class="row gy-6 gy-md-0 justify-content-center">
+        <!-- User Sidebar -->
+        <div class="col-6 order-1 order-md-0">
+            <!-- User Card -->
+            <div class="card mb-6">
+                <div class="card-header bg-primary text-white">
+                    Daftar Submenu
+                </div>
+                <div class="card-body pt-5">
+
+<form method="get" class="form-inline mb-3">
+    <input type="text" name="q" class="form-control mr-2" placeholder="Cari..." value="{{ search_query }}">
+    <button type="submit" class="btn btn-outline-primary mt-2">Cari</button>
+</form>
+
+<a href="{% url 'add_submenu' %}" class="btn btn-primary mb-3 mt-3">Tambah Submenu</a>
+
+<div class="row">
+    {% for submenu in submenus %}
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">{{ submenu.name }}</h5>
+                <p class="card-text"><strong>Menu:</strong> {{ submenu.menu.name }}</p>
+                <p class="card-text"><strong>Icon:</strong>
+                    {{ submenu.icon }}
+                </p>
+                <a href="{% url 'edit_submenu' submenu.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                <a href="{% url 'delete_submenu' submenu.pk %}" class="btn btn-sm btn-danger">Hapus</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <p class="text-center">Tidak ada submenu ditemukan.</p>
+    </div>
+    {% endfor %}
+</div>
+                </div>
+                </div>
+                </div>
+                </div>
+{% endblock %}

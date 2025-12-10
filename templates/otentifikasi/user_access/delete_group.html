@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Hapus Grup{% endblock %}
+{% block content %}
+
+    <div class="row gy-6 gy-md-0 justify-content-center">
+        <!-- User Sidebar -->
+        <div class="col-6 order-1 order-md-0">
+            <!-- User Card -->
+            <div class="card mb-6">
+                <div class="card-header bg-primary text-white">
+                    Hapus Grup
+                </div>
+                <div class="card-body pt-5">
+<div class="alert alert-danger" role="alert">
+    Apakah Anda yakin ingin menghapus grup "<strong>{{ group.name }}</strong>"?
+</div>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger mt-3">Hapus</button>
+    <a href="{% url 'group' %}" class="btn btn-secondary mt-3">Batal</a>
+</form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

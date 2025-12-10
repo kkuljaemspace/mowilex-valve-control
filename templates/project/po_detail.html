@@ -1,0 +1,430 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}
+PO Detail - #{{ ponum }}
+{% endblock title %}
+
+{% block content %}
+<div class="container my-4">
+
+  {# Tampilkan error jika ada, misal dari view po_detail #}
+  {% if error %}
+    <div class="alert alert-danger">
+      {{ error }}
+    </div>
+  {% endif %}
+
+  <!-- Form untuk memilih valve (setelah SCAN selesai, status PO menjadi PROSES PO) -->
+  <form id="open-valve-form">
+    {% csrf_token %}
+    <div class="row text-center mb-4">
+      <div class="col-12">
+        <h5>PROSES PO | STATUS : {{ epicorstatus }}</h5>
+      </div>
+
+      {% for item in summary_data.value %}
+        {% if forloop.first %}
+          <div class="col-12 mb-5">
+            <input type="text" class="form-control w-100 h-100 mb-3 text-center bg-white" style="font-size:20px" name="valve_partnum" value="{{ item.PODetail_PartNum }}" readonly>
+          </div>
+        {% endif %}
+      {% endfor %}
+      <div class="col-8">
+        <input type="text" class="form-control w-100 h-100 mb-3 text-center bg-white" style="font-size:20px"
+               placeholder="Enter Valve PartNumber" id="valve_number" required>
+      </div>
+      <div class="col-4">
+        <button type="submit" class="btn btn-success w-100 h-100" style="font-size:20px">
+          <i class="ri-send-plane-line" style="font-size:20px"></i>
+        </button>
+      </div>
+    </div>
+  </form>
+  <!-- Tempat menampilkan hasil respon pemilihan/open valve -->
+  <div id="open-valve-result" class="text-center mb-4"></div>
+
+  <!-- Tombol untuk menandai PO sebagai DONE atau PAUSE -->
+  <div class="mt-4 text-center">
+    <div class="row">
+    <div class="col-4">
+        <button id="btn-done" disabled class="btn btn-success w-100 h-100" style="font-size:20px">
+          <i class="ri-mail-check-line"></i>
+        </button>
+    </div>
+    <div class="col-4">
+    <button id="btn-pause" class="btn btn-warning w-100 h-100" style="font-size:20px"><i class="ri-pause-large-line"></i></button>
+    </div>
+    <div class="col-4">
+    <form method="POST">
+      {% csrf_token %}
+      <input type="hidden" name="epicor_id" value="{{ ponum }}">
+      {% for item in summary_data.value %}
+        {% if forloop.first %}
+      <input type="hidden" name="valve_instance" value="{{ item.PODetail_PartNum }}">
+        {% endif %}
+      {% endfor %}
+    <button type="submit" class="btn btn-danger w-100 h-100" style="font-size:20px" onclick="return confirm('Apakah Anda yakin ingin menghapus proses PO ini?');"><i class="ri-chat-delete-line"></i></button>
+    </form>
+    </div>
+    </div>
+  </div>
+  <div id="po-action-result" class="text-center mt-2"></div>
+
+  <hr class="text-dark">
+
+  <!-- Tampilan Vendor Info (diambil dari data detail, tampilkan data terakhir) -->
+  <div class="text-center mb-4">
+    <h4 class="mb-2">
+      {% for item in detail_data.value %}
+        {% if forloop.last %}
+          {{ item.Vendor_Name }}<br>ID: {{ item.Vendor_VendorID }}
+        {% endif %}
+      {% endfor %}
+    </h4>
+  </div>
+
+  <!-- Tombol toggle untuk Summary & Detail -->
+  <div class="text-center mb-4">
+    <button id="btn-show-summary" class="btn btn-primary">Summary</button>
+    <button id="btn-show-detail" class="btn btn-secondary">Detail</button>
+  </div>
+
+  <!-- PO SUMMARY Section (ditampilkan default) -->
+  <div id="po-summary-section">
+    <table id="summaryTable" class="table table-striped" style="width:100%;">
+      <thead>
+        <tr>
+          <th><h5>Summary - #{{ ponum }}</h5></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in summary_data.value %}
+        <tr>
+          <td>
+            <form>
+              <div class="mb-3">
+                <label for="POHeader_PONum_{{ forloop.counter }}" class="form-label">PONum</label>
+                <input type="text" id="POHeader_PONum_{{ forloop.counter }}" class="form-control" value="{{ item.POHeader_PONum }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+              <div class="mb-3">
+                <label for="POHeader_OrderDate_{{ forloop.counter }}" class="form-label">OrderQty</label>
+                <input type="text" id="POHeader_OrderDate_{{ forloop.counter }}" class="form-control" value="{{ item.PODetail_OrderQty|intcomma }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+              <div class="mb-3">
+                <label for="POHeader_OpenOrder_{{ forloop.counter }}" class="form-label">POLine</label>
+                <input type="text" id="POHeader_OpenOrder_{{ forloop.counter }}" class="form-control" value="{{ item.PODetail_POLine }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+              <div class="mb-3">
+                <label for="POHeader_EntryPerson_{{ forloop.counter }}" class="form-label">PartNum</label>
+                <input type="text" id="POHeader_EntryPerson_{{ forloop.counter }}" class="form-control" value="{{ item.PODetail_PartNum }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+              <hr class="text-dark">
+              <div class="mb-3 text-dark"><strong>CALCULATED QTY</strong></div>
+              <div class="mb-3">
+                <label for="POHeader_VendorNum_{{ forloop.counter }}" class="form-label">ReceivedQty</label>
+                <input type="text" id="POHeader_VendorNum_{{ forloop.counter }}" class="form-control" value="{{ item.Calculated_ReceivedQty|intcomma }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+              <div class="mb-3">
+                <label for="Vendor_VendorID_{{ forloop.counter }}" class="form-label">PassedQty</label>
+                <input type="text" id="Vendor_VendorID_{{ forloop.counter }}" class="form-control" value="{{ item.Calculated_PassedQty|intcomma }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+              <div class="mb-3">
+                <label for="Vendor_Name_{{ forloop.counter }}" class="form-label">FailedQty</label>
+                <input type="text" id="Vendor_Name_{{ forloop.counter }}" class="form-control" value="{{ item.Calculated_FailedQty|intcomma }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+              <div class="mb-3">
+                <label for="Vendor_RowIdent_{{ forloop.counter }}" class="form-label">RowIdent</label>
+                <input type="text" id="Vendor_RowIdent_{{ forloop.counter }}" class="form-control" value="{{ item.RowIdent }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PO DETAIL Section (disembunyikan default) -->
+  <div id="po-detail-section" style="display:none;">
+    <table id="detailTable" class="table table-striped" style="width:100%;">
+      <thead>
+        <tr>
+          <th><h5>Detail - #{{ ponum }}</h5></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in detail_data.value %}
+        <tr>
+          <td>
+            <form>
+              <div class="mb-3">
+                <label for="POHeader_PONum_{{ forloop.counter }}_detail" class="form-label">POHeader_PONum</label>
+                <input type="text" id="POHeader_PONum_{{ forloop.counter }}_detail" class="form-control" value="{{ item.POHeader_PONum }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+              <div class="mb-3">
+                <label for="POHeader_Company_{{ forloop.counter }}_detail" class="form-label">POHeader_Company</label>
+                <input type="text" id="POHeader_Company_{{ forloop.counter }}_detail" class="form-control" value="{{ item.POHeader_Company }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+              <div class="mb-3">
+                <label for="POHeader_OpenOrder_{{ forloop.counter }}_detail" class="form-label">POHeader_OpenOrder</label>
+                <input type="text" id="POHeader_OpenOrder_{{ forloop.counter }}_detail" class="form-control" value="{{ item.POHeader_OpenOrder }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+              <div class="mb-3">
+                <label for="POHeader_EntryPerson_{{ forloop.counter }}_detail" class="form-label">POHeader_EntryPerson</label>
+                <input type="text" id="POHeader_EntryPerson_{{ forloop.counter }}_detail" class="form-control" value="{{ item.POHeader_EntryPerson }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+              <div class="mb-3">
+                <label for="POHeader_OrderDate_{{ forloop.counter }}_detail" class="form-label">POHeader_OrderDate</label>
+                <input type="text" id="POHeader_OrderDate_{{ forloop.counter }}_detail" class="form-control" value="{{ item.POHeader_OrderDate }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+              <div class="mb-3">
+                <label for="POHeader_VendorNum_{{ forloop.counter }}_detail" class="form-label">POHeader_VendorNum</label>
+                <input type="text" id="POHeader_VendorNum_{{ forloop.counter }}_detail" class="form-control" value="{{ item.POHeader_VendorNum }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+              <div class="mb-3">
+                <label for="Vendor_VendorID_{{ forloop.counter }}_detail" class="form-label">Vendor_VendorID</label>
+                <input type="text" id="Vendor_VendorID_{{ forloop.counter }}_detail" class="form-control" value="{{ item.Vendor_VendorID }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+              <div class="mb-3">
+                <label for="Vendor_Name_{{ forloop.counter }}_detail" class="form-label">Vendor_Name</label>
+                <input type="text" id="Vendor_Name_{{ forloop.counter }}_detail" class="form-control" value="{{ item.Vendor_Name }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+              <div class="mb-3">
+                <label for="PODetail_POLine_{{ forloop.counter }}_detail" class="form-label">PODetail_POLine</label>
+                <input type="text" id="PODetail_POLine_{{ forloop.counter }}_detail" class="form-control" value="{{ item.PODetail_POLine }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+              <div class="mb-3">
+                <label for="PODetail_PartNum_{{ forloop.counter }}_detail" class="form-label">PODetail_PartNum</label>
+                <input type="text" id="PODetail_PartNum_{{ forloop.counter }}_detail" class="form-control" value="{{ item.PODetail_PartNum }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+              <div class="mb-3">
+                <label for="PODetail_LineDesc_{{ forloop.counter }}_detail" class="form-label">PODetail_LineDesc</label>
+                <input type="text" id="PODetail_LineDesc_{{ forloop.counter }}_detail" class="form-control" value="{{ item.PODetail_LineDesc }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+              <div class="mb-3">
+                <label for="PODetail_OrderQty_{{ forloop.counter }}_detail" class="form-label">PODetail_OrderQty</label>
+                <input type="text" id="PODetail_OrderQty_{{ forloop.counter }}_detail" class="form-control" value="{{ item.PODetail_OrderQty|intcomma }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+              <div class="mb-3">
+                <label for="PODetail_XOrderQty_{{ forloop.counter }}_detail" class="form-label">PODetail_XOrderQty</label>
+                <input type="text" id="PODetail_XOrderQty_{{ forloop.counter }}_detail" class="form-control" value="{{ item.PODetail_XOrderQty|intcomma }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+              <div class="mb-3">
+                <label for="PORel_PORelNum_{{ forloop.counter }}_detail" class="form-label">PORel_PORelNum</label>
+                <input type="text" id="PORel_PORelNum_{{ forloop.counter }}_detail" class="form-control" value="{{ item.PORel_PORelNum }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+              <div class="mb-3">
+                <label for="PORel_PORelOpen_{{ forloop.counter }}_detail" class="form-label">PORel_PORelOpen</label>
+                <input type="text" id="PORel_PORelOpen_{{ forloop.counter }}_detail" class="form-control" value="{{ item.PORel_PORelOpen }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+              <div class="mb-3">
+                <label for="RcvDtl_PackSlip_{{ forloop.counter }}_detail" class="form-label">RcvDtl_PackSlip</label>
+                <input type="text" id="RcvDtl_PackSlip_{{ forloop.counter }}_detail" class="form-control" value="{{ item.RcvDtl_PackSlip }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+              <div class="mb-3">
+                <label for="RcvDtl_PackLine_{{ forloop.counter }}_detail" class="form-label">RcvDtl_PackLine</label>
+                <input type="text" id="RcvDtl_PackLine_{{ forloop.counter }}_detail" class="form-control" value="{{ item.RcvDtl_PackLine }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+              <div class="mb-3">
+                <label for="RcvDtl_PartNum_{{ forloop.counter }}_detail" class="form-label">RcvDtl_PartNum</label>
+                <input type="text" id="RcvDtl_PartNum_{{ forloop.counter }}_detail" class="form-control" value="{{ item.RcvDtl_PartNum }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+              <div class="mb-3">
+                <label for="Calculated_ReceivedQty_{{ forloop.counter }}_detail" class="form-label">Calculated_ReceivedQty</label>
+                <input type="text" id="Calculated_ReceivedQty_{{ forloop.counter }}_detail" class="form-control" value="{{ item.Calculated_ReceivedQty|intcomma }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+              <div class="mb-3">
+                <label for="Calculated_PassedQty_{{ forloop.counter }}_detail" class="form-label">Calculated_PassedQty</label>
+                <input type="text" id="Calculated_PassedQty_{{ forloop.counter }}_detail" class="form-control" value="{{ item.Calculated_PassedQty|intcomma }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+              <div class="mb-3">
+                <label for="Calculated_FailedQty_{{ forloop.counter }}_detail" class="form-label">Calculated_FailedQty</label>
+                <input type="text" id="Calculated_FailedQty_{{ forloop.counter }}_detail" class="form-control" value="{{ item.Calculated_FailedQty|intcomma }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+              <div class="mb-3">
+                <label for="RowIdent_{{ forloop.counter }}_detail" class="form-label">RowIdent</label>
+                <input type="text" id="RowIdent_{{ forloop.counter }}_detail" class="form-control" value="{{ item.RowIdent }}" disabled style="background-color:#fff; color:#000;">
+              </div>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<!-- Modal Alarm -->
+<div class="modal fade" id="alarmModal" tabindex="-1" role="dialog" aria-labelledby="alarmModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content bg-danger">
+      <div class="modal-header text-center">
+        <h3 class="modal-title text-white">Alarm</h3>
+      </div>
+      <div class="modal-body text-center">
+        <h5 class="modal-title text-white">Terjadi kesalahan. Silahkan periksa input valve.</h5>
+      </div>
+      <div class="modal-footer text-center">
+         <button type="button" class="btn btn-light" id="alarmOkBtn">CLOSE ALARM</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scriptbottom %}
+<!-- Include DataTables & jQuery -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+<script>
+  $(document).ready(function() {
+    $('#summaryTable').DataTable({
+      "pageLength": 1,
+      "ordering": false,
+      "searching": false,
+      "lengthChange": false,
+      "pagingType": "simple"
+    });
+    $('#detailTable').DataTable({
+      "pageLength": 1,
+      "ordering": false,
+      "searching": false,
+      "lengthChange": false,
+      "pagingType": "simple"
+    });
+
+    // Toggle tampilan dengan tombol Summary & Detail
+    $("#btn-show-summary").click(function(){
+      $("#po-summary-section").show();
+      $("#po-detail-section").hide();
+      $(this).removeClass("btn-secondary").addClass("btn-primary");
+      $("#btn-show-detail").removeClass("btn-primary").addClass("btn-secondary");
+    });
+    $("#btn-show-detail").click(function(){
+      $("#po-summary-section").hide();
+      $("#po-detail-section").show();
+      $(this).removeClass("btn-secondary").addClass("btn-primary");
+      $("#btn-show-summary").removeClass("btn-primary").addClass("btn-secondary");
+    });
+
+    // Event listener untuk mengaktifkan tombol DONE
+    $("#valve_number").on('input', function(){
+      var valveNum = $(this).val().trim();
+      var valvePartnum = $("input[name='valve_partnum']").val().trim();
+      if(valveNum === valvePartnum){
+        $("#btn-done").removeAttr("disabled");
+      } else {
+        $("#btn-done").attr("disabled", "disabled");
+      }
+    });
+
+    // Fungsi untuk memicu alarm: kirim POST value=1 dan tampilkan modal
+    function triggerAlarm(){
+      $.ajax({
+         url: "{% url 'alarm' %}",
+         method: "POST",
+         data: {
+           value: 1,
+           csrfmiddlewaretoken: '{{ csrf_token }}'
+         },
+         success: function(){
+           $("#alarmModal").modal("show");
+         },
+         error: function(){
+           // Jika terjadi error pada request alarm, tetap tampilkan modal
+           $("#alarmModal").modal("show");
+         }
+      });
+    }
+
+    // Event saat modal ditutup (baik karena klik close atau OK)
+    $('#alarmModal').on('hidden.bs.modal', function () {
+      $.ajax({
+         url: "{% url 'alarm' %}",
+         method: "POST",
+         data: {
+           value: 0,
+           csrfmiddlewaretoken: '{{ csrf_token }}'
+         }
+      });
+    });
+
+    // Jika tombol OK diklik, tutup modal (event hidden.bs.modal akan mengirim POST value=0)
+    $("#alarmOkBtn").click(function(){
+      $("#alarmModal").modal("hide");
+    });
+
+    // AJAX untuk mengirim perintah open valve (proses memilih valve)
+    $("#open-valve-form").submit(function(e){
+      e.preventDefault();
+      var valveNum = $("#valve_number").val().trim();
+      var valvePartnum = $("input[name='valve_partnum']").val().trim();
+
+      if(valveNum === ""){
+        $("#open-valve-result").html("<div class='alert alert-warning'>Masukkan nomor valve.</div>");
+        triggerAlarm();
+        return;
+      }
+      if(valveNum !== valvePartnum){
+        $("#open-valve-result").html("<div class='alert alert-warning'>Anda mencoba membuka valve yang salah.</div>");
+        triggerAlarm();
+        return;
+      }
+
+      $.ajax({
+        url: "{% url 'open_valve' %}",
+        method: "GET",
+        data: {
+          valve: valveNum,
+          valve_partnum: valvePartnum
+        },
+        success: function(response){
+          if(response.response === 0){
+            $("#open-valve-result").html("<div class='alert alert-success'>Valve " + response.valve + " berhasil dibuka.</div>");
+          } else {
+            $("#open-valve-result").html("<div class='alert alert-danger'>Valve " + response.valve + " gagal dibuka. Kondisi Valve: " + response.error + "</div>");
+            triggerAlarm();
+          }
+        },
+        error: function(xhr, status, error){
+          $("#open-valve-result").html("<div class='alert alert-danger'>Terjadi kesalahan: " + error + "</div>");
+          triggerAlarm();
+        }
+      });
+    });
+
+    $("#btn-done").click(function(){
+    let valvePartNum = $("input[name='valve_partnum']").val();  // Ambil nilai valve_partnum
+    let url = `/po/{{ ponum }}/${valvePartNum}/done/`;  // Masukkan dalam URL
+
+    $.ajax({
+        url: url,
+        method: "GET",
+        success: function(response){
+            $("#po-action-result").html("<div class='alert alert-success'>" + response.message + "</div>");
+        },
+        error: function(xhr, status, error){
+            $("#po-action-result").html("<div class='alert alert-danger'>Terjadi kesalahan: " + error + "</div>");
+        }
+    });
+});
+
+$("#btn-pause").click(function(){
+    let valvePartNum = $("input[name='valve_partnum']").val();  // Ambil nilai valve_partnum
+    let url = `/po/{{ ponum }}/${valvePartNum}/pause/`;  // Masukkan dalam URL
+
+    $.ajax({
+        url: url,
+        method: "GET",
+        success: function(response){
+            $("#po-action-result").html("<div class='alert alert-warning'>" + response.message + "</div>");
+        },
+        error: function(xhr, status, error){
+            $("#po-action-result").html("<div class='alert alert-danger'>Terjadi kesalahan: " + error + "</div>");
+        }
+    });
+});
+
+  });
+</script>
+{% endblock %}

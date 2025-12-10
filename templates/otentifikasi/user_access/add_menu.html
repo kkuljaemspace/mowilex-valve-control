@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Tambah Menu{% endblock %}
+{% block content %}
+
+    <div class="row gy-6 gy-md-0 justify-content-center">
+        <!-- User Sidebar -->
+        <div class="col-6 order-1 order-md-0">
+            <!-- User Card -->
+            <div class="card mb-6">
+                <div class="card-header bg-primary text-white">
+                    Tambah Menu
+                </div>
+                <div class="card-body pt-5">
+<form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+        {{ form.name.label_tag }}
+        {{ form.name }}
+    </div>
+    <div class="form-group">
+        {{ form.icon.label_tag }}
+        {{ form.icon }}
+        {% if form.icon.help_text %}
+        <small class="form-text text-muted">{{ form.icon.help_text }}</small>
+        {% endif %}
+    </div>
+    <button type="submit" class="btn btn-success mt-3">Simpan</button>
+    <a href="{% url 'menu' %}" class="btn btn-secondary mt-3">Batal</a>
+</form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

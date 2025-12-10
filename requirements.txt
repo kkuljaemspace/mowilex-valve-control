@@ -1,0 +1,8 @@
+Django>=5.1.1
+django-import-export
+django-crispy-forms
+crispy-bootstrap5
+django-select2
+django-pwa
+pyModbusTCP
+cx-Oracle

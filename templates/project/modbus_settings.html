@@ -1,0 +1,298 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Modbus Server Settings{% endblock title %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <!-- Modbus Server Status -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="ri-server-line me-2"></i>Status Modbus Server</h5>
+                <span class="badge {% if status.running %}bg-success{% else %}bg-secondary{% endif %}" id="status-badge">
+                    {% if status.running %}
+                        <i class="ri-play-circle-fill"></i> Running
+                    {% else %}
+                        <i class="ri-stop-circle-fill"></i> Stopped
+                    {% endif %}
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Server Address:</strong> <code id="server-host">{{ status.host|default:"Not started" }}</code></p>
+                        <p><strong>Port:</strong> <code id="server-port">{{ status.port|default:"Not started" }}</code></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Last Update:</strong> <span id="last-update">{{ status.timestamp }}</span></p>
+                        <p><strong>Role:</strong> <span class="badge bg-info">Modbus Slave/Server</span></p>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    {% if status.running %}
+                        <a href="{% url 'modbus_stop' %}" class="btn btn-danger">
+                            <i class="ri-stop-circle-line"></i> Stop Server
+                        </a>
+                        <a href="{% url 'modbus_restart' %}" class="btn btn-warning">
+                            <i class="ri-restart-line"></i> Restart Server
+                        </a>
+                    {% else %}
+                        <a href="{% url 'modbus_start' %}" class="btn btn-success">
+                            <i class="ri-play-circle-line"></i> Start Server
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Modbus Configuration Form -->
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="ri-settings-3-line me-2"></i>Konfigurasi Modbus</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <h6 class="text-primary mb-3"><i class="ri-smartphone-line"></i> Android Server Settings</h6>
+                    
+                    <div class="alert alert-info" role="alert">
+                        <i class="ri-information-line"></i> 
+                        <strong>Android bertindak sebagai MODBUS SLAVE/SERVER</strong><br>
+                        Android akan <strong>LISTEN (menunggu koneksi)</strong> dari PLC di port ini.<br>
+                        PLC yang akan <strong>CONNECT</strong> ke IP:Port Android ini.
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <label for="android_ip" class="form-label">IP Address Android/Server</label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="android_ip" 
+                                name="android_ip" 
+                                value="{{ config.android_ip }}"
+                                placeholder="0.0.0.0"
+                                required>
+                            <small class="text-muted">
+                                <i class="ri-information-line"></i> 
+                                0.0.0.0 = Semua interface network, atau isi IP spesifik Android
+                            </small>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="android_port" class="form-label">Port Modbus Server</label>
+                            <input 
+                                type="number" 
+                                class="form-control" 
+                                id="android_port" 
+                                name="android_port" 
+                                value="{{ config.android_port }}"
+                                min="1024"
+                                max="65535"
+                                required>
+                            <small class="text-muted">
+                                <i class="ri-alert-line"></i> 
+                                Gunakan port ≥1024 (Android)
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning" role="alert">
+                        <i class="ri-error-warning-line"></i> 
+                        <strong>Penting untuk Android:</strong> 
+                        Port <1024 memerlukan root access. Gunakan port 9502 atau lebih tinggi untuk Android non-root.
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h6 class="text-primary mb-3"><i class="ri-cpu-line"></i> PLC Settings (Modbus Master)</h6>
+                    
+                    <div class="alert alert-warning" role="alert">
+                        <i class="ri-alert-line"></i> 
+                        <strong>PLC bertindak sebagai MODBUS MASTER/CLIENT</strong><br>
+                        Setting ini hanya untuk <strong>dokumentasi/referensi</strong>.<br>
+                        <strong>PLC harus di-configure untuk CONNECT ke Android:</strong><br>
+                        • Remote IP: <code>&lt;IP-Android-di-network&gt;</code> (misal: 192.168.2.100)<br>
+                        • Remote Port: <code>9502</code> (port yang Android listen)<br>
+                        <br>
+                        <strong>Port 502 di bawah ini BUKAN untuk Android connect ke PLC!</strong>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <label for="plc_ip" class="form-label">IP Address PLC</label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="plc_ip" 
+                                name="plc_ip" 
+                                value="{{ config.plc_ip }}"
+                                placeholder="192.168.2.99"
+                                required>
+                            <small class="text-muted">
+                                <i class="ri-information-line"></i> 
+                                IP address dari PLC yang akan connect ke server ini
+                            </small>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="plc_port" class="form-label">Port PLC</label>
+                            <input 
+                                type="number" 
+                                class="form-control" 
+                                id="plc_port" 
+                                name="plc_port" 
+                                value="{{ config.plc_port }}"
+                                min="1"
+                                max="65535"
+                                required>
+                            <small class="text-muted">
+                                <i class="ri-information-line"></i> 
+                                Biasanya 502 (standar Modbus)
+                            </small>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="form-check form-switch mb-3">
+                        <input 
+                            class="form-check-input" 
+                            type="checkbox" 
+                            id="auto_start" 
+                            name="auto_start"
+                            {% if config.auto_start %}checked{% endif %}>
+                        <label class="form-check-label" for="auto_start">
+                            <i class="ri-rocket-line"></i> Auto-start Modbus server saat aplikasi dijalankan
+                        </label>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <small class="text-muted">
+                            <i class="ri-time-line"></i> 
+                            Last updated: {{ config.updated_at|date:"d M Y H:i" }}
+                            {% if config.updated_by %}by {{ config.updated_by.username }}{% endif %}
+                        </small>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="ri-save-line"></i> Simpan Konfigurasi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Panel -->
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0"><i class="ri-information-line"></i> Informasi</h6>
+            </div>
+            <div class="card-body">
+                <h6 class="text-primary">Arsitektur Komunikasi</h6>
+                <div class="mb-3">
+                    <small>
+                        <pre class="bg-light p-2 rounded" style="font-size: 0.7rem;">
+┌─────────────────────┐
+│   PLC (Master)      │
+│ {{ config.plc_ip }}:xxxxx   │ ← Port random
+│                     │    saat connect
+└──────────┬──────────┘
+           │ 
+           │ PLC CONNECT TO:
+           │ {{ config.android_ip }}:{{ config.android_port }}
+           │
+┌──────────▼──────────┐
+│ Android (Slave)     │ ← You are here
+│ LISTEN: {{ config.android_port }}      │ ← Menunggu koneksi
+│ (Modbus Server)     │
+└──────────┬──────────┘
+           │
+           │ Sync Data
+           │
+┌──────────▼──────────┐
+│  Django Database    │
+│  (SQLite)           │
+└─────────────────────┘
+                        </pre>
+                    </small>
+                </div>
+
+                <h6 class="text-primary">Cara Setting PLC</h6>
+                <ul class="small">
+                    <li><strong>Mode:</strong> Modbus TCP Client</li>
+                    <li><strong>Remote IP:</strong> <code>&lt;IP-Android&gt;</code></li>
+                    <li><strong>Remote Port:</strong> <code>{{ config.android_port }}</code></li>
+                    <li><strong>Local Port PLC:</strong> Otomatis (random)</li>
+                </ul>
+
+                <h6 class="text-primary">Register Mapping</h6>
+                <ul class="small">
+                    <li><strong>0-10:</strong> Database → Modbus (Write command)</li>
+                    <li><strong>11-20:</strong> Modbus → Database (Read status)</li>
+                </ul>
+
+                <h6 class="text-primary mt-3">Port Information</h6>
+                <ul class="small">
+                    <li><strong>Android Port {{ config.android_port }}:</strong> Port yang Android LISTEN (tunggu koneksi PLC)</li>
+                    <li><strong>Port 502:</strong> Standar Modbus, tapi tidak dipakai di Android</li>
+                    <li><strong>Port ≥1024:</strong> Non-privileged, aman untuk Android</li>
+                    <li><strong>PLC Port:</strong> Otomatis random saat PLC connect</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card bg-light">
+            <div class="card-body">
+                <h6 class="text-success"><i class="ri-checkbox-circle-line"></i> Checklist Setup</h6>
+                <ul class="small mb-0">
+                    <li>✅ Android listen di port <strong>{{ config.android_port }}</strong></li>
+                    <li>✅ Pastikan Android terkoneksi WiFi yang sama dengan PLC</li>
+                    <li>✅ Cek IP Android di network (Settings → WiFi → IP)</li>
+                    <li>✅ <strong>Setting PLC untuk connect ke IP-Android:{{ config.android_port }}</strong></li>
+                    <li>✅ Test koneksi dari PLC</li>
+                </ul>
+                <hr>
+                <h6 class="text-danger"><i class="ri-alert-line"></i> Troubleshooting</h6>
+                <ul class="small mb-0">
+                    <li>❌ <strong>JANGAN</strong> coba connect Android ke PLC port 502</li>
+                    <li>✅ <strong>PLC yang connect KE Android</strong>, bukan sebaliknya</li>
+                    <li>Jika gagal connect: cek firewall Android/PLC</li>
+                    <li>Pastikan IP Android bisa di-ping dari PLC</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-refresh status setiap 5 detik
+setInterval(function() {
+    fetch('{% url "modbus_status_api" %}')
+        .then(response => response.json())
+        .then(data => {
+            // Update status badge
+            const badge = document.getElementById('status-badge');
+            if (data.running) {
+                badge.className = 'badge bg-success';
+                badge.innerHTML = '<i class="ri-play-circle-fill"></i> Running';
+                
+                // Update host & port
+                document.getElementById('server-host').textContent = data.host;
+                document.getElementById('server-port').textContent = data.port;
+            } else {
+                badge.className = 'badge bg-secondary';
+                badge.innerHTML = '<i class="ri-stop-circle-fill"></i> Stopped';
+                
+                document.getElementById('server-host').textContent = 'Not started';
+                document.getElementById('server-port').textContent = 'Not started';
+            }
+            
+            // Update timestamp
+            document.getElementById('last-update').textContent = data.timestamp;
+        })
+        .catch(error => console.error('Error fetching status:', error));
+}, 5000);
+</script>
+{% endblock content %}

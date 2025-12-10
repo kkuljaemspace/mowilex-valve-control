@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Inquiry
+{% endblock title %}
+
+{% block content %}
+<div class="row gy-6 gy-md-0 justify-content-center">
+    <div class="col-12 order-1 order-md-0">
+        <div class="card mb-6">
+            <div class="card-body pt-5">
+                <h2>Inquiry</h2>
+                <!-- Form Filter Tanggal -->
+                <form method="get" class="mb-4">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="start_date">Tanggal Mulai</label>
+                            <input type="date" name="start_date" id="start_date" class="form-control" value="{{ start_date }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="end_date">Tanggal Selesai</label>
+                            <input type="date" name="end_date" id="end_date" class="form-control" value="{{ end_date }}">
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary">Filter</button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Tabel Epicor PO -->
+                <h3>Epicor PO</h3>
+                <div class="table table-responsive">
+                <table class="table table-bordered my-5">
+                    <thead>
+                        <tr>
+                            <th>PONum</th>
+                            <th>Tanggal Dibuat</th>
+                            <th>Tanggal Diupdate</th>
+                            <th>User</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for epicor in epicor_list %}
+                        <tr>
+                            <td>{{ epicor.ponum }}</td>
+                            <td>{{ epicor.created_at|date:"Y-m-d H:i" }}</td>
+                            <td>{{ epicor.updated_at|date:"Y-m-d H:i" }}</td>
+                            <td>{{ epicor.user }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4">Tidak ada data Epicor PO untuk periode ini.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+                <!-- Tabel Valve Operation -->
+                <h3>Valve Operation</h3>
+                <div class="table table-responsive">
+                <table class="table table-bordered my-5">
+                    <thead>
+                        <tr>
+                            <th>Valve Number</th>
+                            <th>Command Value</th>
+                            <th>Status Value</th>
+                            <th>Status</th>
+                            <th>Tanggal Eksekusi</th>
+                            <th>User</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for valve in valve_list %}
+                        <tr>
+                            <td>{{ valve.valve_number }}</td>
+                            <td>{{ valve.command_value }}</td>
+                            <td>{{ valve.status_value }}</td>
+                            <td>{{ valve.status }}</td>
+                            <td>{{ valve.created_at|date:"Y-m-d H:i" }}</td>
+                            <td>{{ valve.user }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6">Tidak ada data Valve Operation untuk periode ini.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

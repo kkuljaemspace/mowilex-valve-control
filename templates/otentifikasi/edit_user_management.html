@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+Edit User: {{ user.username }}
+{% endblock title %}
+
+{% block content %}
+
+    <div class="row gy-6 gy-md-0 justify-content-center">
+        <!-- User Sidebar -->
+        <div class="col-6 order-1 order-md-0">
+            <!-- User Card -->
+            <div class="card mb-6">
+                <div class="card-header bg-primary text-white">
+                    Edit User: {{ user.username }}
+                </div>
+                <div class="card-body pt-5">
+                  <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ edituserform.as_p }}
+                    <button type="submit" class="btn btn-primary">Update User</button>
+                    <a href="javascript:void(0);" class="btn btn-secondary" onclick="window.close();">Cancel</a>
+                  </form>
+</div>
+
+            </div>
+            <!-- /User Card -->
+        </div>
+        <!--/ User Sidebar -->
+    </div>
+{% endblock %}

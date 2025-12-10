@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}
+Daftar PO
+{% endblock title %}
+
+{% block content %}
+<div class="container my-4">
+  <h3>Daftar PO</h3>
+  <div class="card">
+    <div class="card-body">
+      <div class="table-responsive">
+  <table id="poListTable" class="table table-striped">
+    <thead>
+      <tr>
+        <th>PO Number</th>
+        <th>Tanggal Dibuat</th>
+        <th>Status PO</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for po in po_list %}
+      <tr>
+        <td>{{ po.ponum }}</td>
+        <td>{{ po.created_at|date:"Y-m-d H:i" }}</td>
+        <td>{{ po.status }}</td>
+        <td>
+          <a href="{% url 'po_detail' po.ponum %}" class="btn btn-primary btn-sm">Detail</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="4">Tidak ada PO.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block scriptbottom %}
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#poListTable').DataTable({
+      "ordering": true,
+      "searching": true,
+      "lengthChange": true,
+      "pagingType": "simple",
+      "order": []  // Urutan default sudah diatur dari view
+    });
+});
+</script>
+{% endblock scriptbottom %}

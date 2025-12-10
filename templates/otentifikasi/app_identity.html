@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+
+{% block title %}
+App Identity
+{% endblock title %}
+
+
+{% block content %}
+
+    <div class="row gy-6 gy-md-0 justify-content-center">
+        <!-- User Sidebar -->
+        <div class="col-4 order-1 order-md-0">
+            <!-- User Card -->
+            <div class="card mb-6">
+                <div class="card-header bg-primary text-white">
+                    App Identity
+                </div>
+                <div class="card-body pt-5">
+                    <form class="row g-5" method="POST" action="/app-identity/edit" enctype="multipart/form-data">
+                        {% csrf_token %}
+                         <div class="col-12">
+                            <div class="form-floating form-floating-outline">
+                            <span>Nickname</span>
+                            {{ form1.nickname }}
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-floating form-floating-outline">
+                            <span>Fullname</span>
+                            {{ form1.fullname }}
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-floating form-floating-outline">
+                            <span>Logo (1:1)</span>
+                            {{ form1.logo }}
+                            </div>
+                        </div>
+                        <div class="col-12 text-center d-flex flex-wrap justify-content-center gap-4 row-gap-4">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- /User Card -->
+        </div>
+        <!--/ User Sidebar -->
+    </div>
+    <!-- Modal -->
+{% endblock %}
