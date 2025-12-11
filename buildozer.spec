@@ -27,7 +27,7 @@ version = 1.0.0
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,django==5.1.1,pyModbusTCP,pillow,requests,python-dateutil,cx-Oracle,cryptography,asgiref,sqlparse,tzdata,importlib-metadata,zipp
+requirements = python3,hostpython3,django==5.1.1,pyModbusTCP,pillow,requests,python-dateutil
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
