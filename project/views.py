@@ -282,12 +282,21 @@ def list_po(request):
 def mark_po_done(request, ponum, valve):
     """
     Menandai bahwa PO telah selesai (DONE).
+    Mengirim nilai 0 ke register command untuk menutup valve.
     """
     try:
         po = EpicorPO.objects.get(ponum=ponum)
         po.status = "Selesai"
         po.save()
-        return JsonResponse({"status": "success", "message": "PO telah ditandai selesai."})
+        
+        # Kirim nilai 0 ke register command untuk menutup valve
+        valve_set = ValveSet.objects.filter(valve_number=valve).first()
+        if valve_set:
+            valve_set.status = 0  # 0 = tutup valve
+            valve_set.save()
+            return JsonResponse({"status": "success", "message": "PO telah ditandai selesai dan valve ditutup."})
+        else:
+            return JsonResponse({"status": "success", "message": "PO telah ditandai selesai (valve tidak ditemukan)."})
     except EpicorPO.DoesNotExist:
         return JsonResponse({"status": "error", "message": "PO tidak ditemukan."})
 
