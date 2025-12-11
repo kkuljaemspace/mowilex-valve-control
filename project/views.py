@@ -283,20 +283,32 @@ def mark_po_done(request, ponum, valve):
     """
     Menandai bahwa PO telah selesai (DONE).
     Mengirim nilai 0 ke register command untuk menutup valve.
+    Parameter valve bisa berupa part_number (string) atau valve_number (integer).
     """
     try:
         po = EpicorPO.objects.get(ponum=ponum)
         po.status = "Selesai"
         po.save()
         
+        # Mapping dari part_number ke valve_number jika parameter adalah string
+        if isinstance(valve, str) and not valve.isdigit():
+            # valve adalah part_number seperti 'LEOP001'
+            mapping = MappingValve.objects.filter(part_number=valve).first()
+            if not mapping:
+                return JsonResponse({"status": "error", "message": f"Mapping valve '{valve}' tidak ditemukan."})
+            valve_number = mapping.valve_number
+        else:
+            # valve sudah berupa angka
+            valve_number = int(valve)
+        
         # Kirim nilai 0 ke register command untuk menutup valve
-        valve_set = ValveSet.objects.filter(valve_number=valve).first()
+        valve_set = ValveSet.objects.filter(valve_number=valve_number).first()
         if valve_set:
             valve_set.status = 0  # 0 = tutup valve
             valve_set.save()
-            return JsonResponse({"status": "success", "message": "PO telah ditandai selesai dan valve ditutup."})
+            return JsonResponse({"status": "success", "message": f"PO telah ditandai selesai dan valve {valve_number} ditutup."})
         else:
-            return JsonResponse({"status": "success", "message": "PO telah ditandai selesai (valve tidak ditemukan)."})
+            return JsonResponse({"status": "warning", "message": f"PO telah ditandai selesai (valve {valve_number} tidak ditemukan di register)."})
     except EpicorPO.DoesNotExist:
         return JsonResponse({"status": "error", "message": "PO tidak ditemukan."})
 
