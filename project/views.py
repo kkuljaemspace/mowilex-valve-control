@@ -199,7 +199,7 @@ def open_valve(request):
 
     # Mapping perintah: misal register yang digunakan sesuai dengan nomor valve
     command_register = valve_instance.valve_number
-    nilai_perintah = 0  # 0 artinya perintah untuk membuka valve
+    nilai_perintah = 1  # 1 artinya perintah untuk membuka valve
 
     valve_set = ValveSet.objects.filter(valve_number=command_register).last()
     if not valve_set:
