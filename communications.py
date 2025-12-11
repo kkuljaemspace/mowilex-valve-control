@@ -30,8 +30,8 @@ from pyModbusTCP.server import DataBank, ModbusServer
 from project.models import ValveSet  # Sesuaikan dengan model Anda
 
 # Daftar IP yang diizinkan (opsional)
-ALLOW_R_L = ['127.0.0.1', '192.168.2.99', '192.168.2.81']
-ALLOW_W_L = ['127.0.0.1', '192.168.2.99', '192.168.2.81']
+ALLOW_R_L = ['127.0.0.1', '172.17.164.24', '172.17.164.39']
+ALLOW_W_L = ['127.0.0.1', '172.17.164.24', '172.17.164.39']
 
 
 class SendReceiveDataBank(DataBank):
@@ -162,7 +162,7 @@ if __name__ == '__main__':
     )
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-H', '--host', default='192.168.2.99')
+    parser.add_argument('-H', '--host', default='0.0.0.0')
     parser.add_argument('-p', '--port', type=int, default=1502)
     args = parser.parse_args()
 
