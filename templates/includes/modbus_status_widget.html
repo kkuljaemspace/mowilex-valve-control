@@ -141,7 +141,7 @@
             return;
         }
         
-        fetch('{% url "project:modbus_status_api" %}', {
+        fetch('{% url "modbus_status_api" %}', {
             method: 'GET',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
@@ -239,7 +239,7 @@
         // Click handler - go to settings
         widget.addEventListener('click', function(e) {
             e.preventDefault();
-            window.location.href = '{% url "project:modbus_settings" %}';
+            window.location.href = '{% url "modbus_settings" %}';
         });
         
         // Load last known state from sessionStorage
