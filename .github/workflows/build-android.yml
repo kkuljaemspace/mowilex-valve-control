@@ -52,17 +52,11 @@ jobs:
     
     - name: Prepare project
       run: |
-        # Set permissions
-        chmod +x prepare_android_build.sh main.py
+        # Set permissions for main.py
+        chmod +x main.py
         
-        # Install requirements
-        pip install -r requirements.txt
-        
-        # Run migrations
-        python manage.py migrate
-        
-        # Collect static files
-        python manage.py collectstatic --noinput
+        # Create empty db.sqlite3 if not exists (migrations will run on Android)
+        touch db.sqlite3
     
     - name: Cache Buildozer global directory
       uses: actions/cache@v3
