@@ -1,0 +1,235 @@
+<!-- Floating Modbus Status Widget -->
+<div id="modbus-status-widget" class="modbus-status-widget">
+    <div class="status-indicator" id="modbus-indicator">
+        <div class="spinner-border spinner-border-sm me-2" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <span id="modbus-status-text">Checking...</span>
+    </div>
+    <div class="status-details" id="modbus-details">
+        <small class="text-muted">
+            <i class="ri-server-line me-1"></i>
+            <span id="modbus-host">-</span>:<span id="modbus-port">-</span>
+        </small>
+    </div>
+</div>
+
+<style>
+.modbus-status-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: white;
+    border-radius: 12px;
+    padding: 12px 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1050;
+    min-width: 180px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.modbus-status-widget:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+}
+
+.modbus-status-widget.status-running {
+    border-left: 4px solid #28a745;
+}
+
+.modbus-status-widget.status-stopped {
+    border-left: 4px solid #dc3545;
+}
+
+.modbus-status-widget.status-unknown {
+    border-left: 4px solid #6c757d;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.status-indicator.text-success {
+    color: #28a745;
+}
+
+.status-indicator.text-danger {
+    color: #dc3545;
+}
+
+.status-indicator.text-secondary {
+    color: #6c757d;
+}
+
+.status-details {
+    font-size: 11px;
+    color: #6c757d;
+}
+
+.status-pulse {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #28a745;
+    margin-right: 8px;
+    animation: pulse 2s infinite;
+    display: inline-block;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 8px rgba(40, 167, 69, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+    }
+}
+
+.status-pulse.stopped {
+    background: #dc3545;
+    animation: none;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .modbus-status-widget {
+        bottom: 15px;
+        right: 15px;
+        padding: 10px 12px;
+        min-width: 150px;
+    }
+    
+    .status-indicator {
+        font-size: 12px;
+    }
+    
+    .status-details {
+        font-size: 10px;
+    }
+}
+</style>
+
+<script>
+(function() {
+    let statusCheckInterval;
+    let isCheckingStatus = false;
+    
+    function updateModbusStatus() {
+        if (isCheckingStatus) return;
+        isCheckingStatus = true;
+        
+        fetch('{% url "project:modbus_status_api" %}', {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const widget = document.getElementById('modbus-status-widget');
+            const indicator = document.getElementById('modbus-indicator');
+            const statusText = document.getElementById('modbus-status-text');
+            const hostSpan = document.getElementById('modbus-host');
+            const portSpan = document.getElementById('modbus-port');
+            
+            // Remove all status classes
+            widget.classList.remove('status-running', 'status-stopped', 'status-unknown');
+            indicator.classList.remove('text-success', 'text-danger', 'text-secondary');
+            
+            // Remove spinner
+            const spinner = indicator.querySelector('.spinner-border');
+            if (spinner) spinner.remove();
+            
+            // Remove existing pulse
+            const existingPulse = indicator.querySelector('.status-pulse');
+            if (existingPulse) existingPulse.remove();
+            
+            if (data.is_running) {
+                // Running
+                widget.classList.add('status-running');
+                indicator.classList.add('text-success');
+                
+                // Add pulse indicator
+                const pulse = document.createElement('span');
+                pulse.className = 'status-pulse';
+                indicator.insertBefore(pulse, statusText);
+                
+                statusText.innerHTML = '<i class="ri-checkbox-circle-line me-1"></i>Modbus Running';
+                hostSpan.textContent = data.host || '0.0.0.0';
+                portSpan.textContent = data.port || '9502';
+            } else {
+                // Stopped
+                widget.classList.add('status-stopped');
+                indicator.classList.add('text-danger');
+                
+                // Add stopped pulse
+                const pulse = document.createElement('span');
+                pulse.className = 'status-pulse stopped';
+                indicator.insertBefore(pulse, statusText);
+                
+                statusText.innerHTML = '<i class="ri-close-circle-line me-1"></i>Modbus Stopped';
+                hostSpan.textContent = '-';
+                portSpan.textContent = '-';
+            }
+        })
+        .catch(error => {
+            console.error('Error checking Modbus status:', error);
+            
+            const widget = document.getElementById('modbus-status-widget');
+            const indicator = document.getElementById('modbus-indicator');
+            const statusText = document.getElementById('modbus-status-text');
+            
+            widget.classList.remove('status-running', 'status-stopped');
+            widget.classList.add('status-unknown');
+            indicator.classList.remove('text-success', 'text-danger');
+            indicator.classList.add('text-secondary');
+            
+            // Remove spinner
+            const spinner = indicator.querySelector('.spinner-border');
+            if (spinner) spinner.remove();
+            
+            // Remove existing pulse
+            const existingPulse = indicator.querySelector('.status-pulse');
+            if (existingPulse) existingPulse.remove();
+            
+            statusText.innerHTML = '<i class="ri-error-warning-line me-1"></i>Connection Error';
+        })
+        .finally(() => {
+            isCheckingStatus = false;
+        });
+    }
+    
+    // Click to toggle/refresh or go to settings
+    document.getElementById('modbus-status-widget').addEventListener('click', function() {
+        window.location.href = '{% url "project:modbus_settings" %}';
+    });
+    
+    // Initial check
+    updateModbusStatus();
+    
+    // Check every 5 seconds
+    statusCheckInterval = setInterval(updateModbusStatus, 5000);
+    
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', function() {
+        if (statusCheckInterval) {
+            clearInterval(statusCheckInterval);
+        }
+    });
+    
+    // Check immediately when page becomes visible again
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            updateModbusStatus();
+        }
+    });
+})();
+</script>
