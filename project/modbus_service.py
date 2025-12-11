@@ -249,10 +249,12 @@ class ModbusService:
     
     def get_status(self):
         """Get status server"""
+        is_running = self.server is not None
         return {
-            'running': self.server is not None,
-            'host': self.host,
-            'port': self.port,
+            'is_running': is_running,  # Key yang dipakai widget
+            'running': is_running,      # Backward compatibility
+            'host': self.host or '0.0.0.0',
+            'port': self.port or 9502,
             'timestamp': timezone.now().isoformat()
         }
     
