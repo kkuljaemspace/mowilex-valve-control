@@ -184,6 +184,7 @@ def open_valve(request):
     if valve_str != valve_partnum:
         return JsonResponse({
             "error": "Valve yang dimasukkan tidak sesuai dengan part number yang ditetapkan.",
+            "valve": valve_str or "unknown",
             "response": 1
         })
 
@@ -192,6 +193,7 @@ def open_valve(request):
     if not valve_instance:
         return JsonResponse({
             "error": "Valve PartNumber tidak valid.",
+            "valve": valve_str or "unknown",
             "response": 1
         })
 
@@ -203,6 +205,7 @@ def open_valve(request):
     if not valve_set:
         return JsonResponse({
             "error": "Valve tidak valid.",
+            "valve": valve_instance.valve_number,
             "response": 1
         })
     valve_set.status = nilai_perintah
@@ -212,12 +215,13 @@ def open_valve(request):
     time.sleep(5)
     status_register = valve_set.valve_number + 10
     valve_set_status = ValveSet.objects.filter(valve_number=status_register).last()
-    nilai_status = valve_set_status.status
-    if not nilai_status:
+    if not valve_set_status:
         return JsonResponse({
-            "error": "Status Valve tidak valid.",
+            "error": "Status Valve tidak ditemukan.",
+            "valve": valve_instance.valve_number,
             "response": 1
         })
+    nilai_status = valve_set_status.status
 
     # Interpretasi status
     if nilai_status == 0:
