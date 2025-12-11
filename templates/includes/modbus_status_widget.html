@@ -119,26 +119,41 @@
 
 <script>
 (function() {
+    // Use sessionStorage to persist interval across page navigations
+    const STORAGE_KEY = 'modbus_widget_initialized';
     let statusCheckInterval;
     let isCheckingStatus = false;
+    let consecutiveErrors = 0;
+    const MAX_ERRORS = 3;
     
     function updateModbusStatus() {
         if (isCheckingStatus) return;
         isCheckingStatus = true;
         
+        const widget = document.getElementById('modbus-status-widget');
+        const indicator = document.getElementById('modbus-indicator');
+        const statusText = document.getElementById('modbus-status-text');
+        const hostSpan = document.getElementById('modbus-host');
+        const portSpan = document.getElementById('modbus-port');
+        
+        if (!widget || !indicator || !statusText) {
+            isCheckingStatus = false;
+            return;
+        }
+        
         fetch('{% url "project:modbus_status_api" %}', {
             method: 'GET',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
-            }
+            },
+            cache: 'no-cache'
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
         .then(data => {
-            const widget = document.getElementById('modbus-status-widget');
-            const indicator = document.getElementById('modbus-indicator');
-            const statusText = document.getElementById('modbus-status-text');
-            const hostSpan = document.getElementById('modbus-host');
-            const portSpan = document.getElementById('modbus-port');
+            consecutiveErrors = 0; // Reset error counter on success
             
             // Remove all status classes
             widget.classList.remove('status-running', 'status-stopped', 'status-unknown');
@@ -165,6 +180,9 @@
                 statusText.innerHTML = '<i class="ri-checkbox-circle-line me-1"></i>Modbus Running';
                 hostSpan.textContent = data.host || '0.0.0.0';
                 portSpan.textContent = data.port || '9502';
+                
+                // Store running state
+                sessionStorage.setItem('modbus_last_status', 'running');
             } else {
                 // Stopped
                 widget.classList.add('status-stopped');
@@ -178,57 +196,108 @@
                 statusText.innerHTML = '<i class="ri-close-circle-line me-1"></i>Modbus Stopped';
                 hostSpan.textContent = '-';
                 portSpan.textContent = '-';
+                
+                sessionStorage.setItem('modbus_last_status', 'stopped');
             }
         })
         .catch(error => {
-            console.error('Error checking Modbus status:', error);
+            consecutiveErrors++;
+            console.error(`Error checking Modbus status (${consecutiveErrors}/${MAX_ERRORS}):`, error);
             
-            const widget = document.getElementById('modbus-status-widget');
-            const indicator = document.getElementById('modbus-indicator');
-            const statusText = document.getElementById('modbus-status-text');
-            
-            widget.classList.remove('status-running', 'status-stopped');
-            widget.classList.add('status-unknown');
-            indicator.classList.remove('text-success', 'text-danger');
-            indicator.classList.add('text-secondary');
-            
-            // Remove spinner
-            const spinner = indicator.querySelector('.spinner-border');
-            if (spinner) spinner.remove();
-            
-            // Remove existing pulse
-            const existingPulse = indicator.querySelector('.status-pulse');
-            if (existingPulse) existingPulse.remove();
-            
-            statusText.innerHTML = '<i class="ri-error-warning-line me-1"></i>Connection Error';
+            // Only show error if we've had multiple consecutive errors
+            if (consecutiveErrors >= MAX_ERRORS) {
+                widget.classList.remove('status-running', 'status-stopped');
+                widget.classList.add('status-unknown');
+                indicator.classList.remove('text-success', 'text-danger');
+                indicator.classList.add('text-secondary');
+                
+                // Remove spinner
+                const spinner = indicator.querySelector('.spinner-border');
+                if (spinner) spinner.remove();
+                
+                // Remove existing pulse
+                const existingPulse = indicator.querySelector('.status-pulse');
+                if (existingPulse) existingPulse.remove();
+                
+                statusText.innerHTML = '<i class="ri-error-warning-line me-1"></i>Connection Error';
+                sessionStorage.setItem('modbus_last_status', 'error');
+            }
         })
         .finally(() => {
             isCheckingStatus = false;
         });
     }
     
-    // Click to toggle/refresh or go to settings
-    document.getElementById('modbus-status-widget').addEventListener('click', function() {
-        window.location.href = '{% url "project:modbus_settings" %}';
-    });
-    
-    // Initial check
-    updateModbusStatus();
-    
-    // Check every 5 seconds
-    statusCheckInterval = setInterval(updateModbusStatus, 5000);
-    
-    // Cleanup on page unload
-    window.addEventListener('beforeunload', function() {
+    function initializeWidget() {
+        const widget = document.getElementById('modbus-status-widget');
+        if (!widget) {
+            // Widget not ready yet, try again
+            setTimeout(initializeWidget, 100);
+            return;
+        }
+        
+        // Click handler - go to settings
+        widget.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = '{% url "project:modbus_settings" %}';
+        });
+        
+        // Load last known state from sessionStorage
+        const lastStatus = sessionStorage.getItem('modbus_last_status');
+        if (lastStatus) {
+            const indicator = document.getElementById('modbus-indicator');
+            const statusText = document.getElementById('modbus-status-text');
+            
+            if (lastStatus === 'running') {
+                widget.classList.add('status-running');
+                indicator.classList.add('text-success');
+                statusText.innerHTML = '<i class="ri-checkbox-circle-line me-1"></i>Modbus Running';
+            } else if (lastStatus === 'stopped') {
+                widget.classList.add('status-stopped');
+                indicator.classList.add('text-danger');
+                statusText.innerHTML = '<i class="ri-close-circle-line me-1"></i>Modbus Stopped';
+            }
+        }
+        
+        // Initial check
+        updateModbusStatus();
+        
+        // Check every 5 seconds
         if (statusCheckInterval) {
             clearInterval(statusCheckInterval);
         }
-    });
+        statusCheckInterval = setInterval(updateModbusStatus, 5000);
+        
+        // Mark as initialized
+        sessionStorage.setItem(STORAGE_KEY, 'true');
+    }
+    
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeWidget);
+    } else {
+        initializeWidget();
+    }
     
     // Check immediately when page becomes visible again
     document.addEventListener('visibilitychange', function() {
         if (!document.hidden) {
             updateModbusStatus();
+        }
+    });
+    
+    // Re-initialize on page show (for back/forward navigation)
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            // Page was loaded from cache
+            initializeWidget();
+        }
+    });
+    
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', function() {
+        if (statusCheckInterval) {
+            clearInterval(statusCheckInterval);
         }
     });
 })();
