@@ -5,17 +5,6 @@ Mengelola Modbus TCP Server yang terintegrasi dengan database
 
 import threading
 import logging
-import os
-import sys
-from pathlib import Path
-
-# Setup Django path
-BASE_DIR = Path(__file__).resolve().parent.parent
-sys.path.append(str(BASE_DIR))
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'xcore.settings')
-
-import django
-django.setup()
 
 from django.utils import timezone
 from pyModbusTCP.server import DataBank, ModbusServer
